@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+ 
+   <resource-ref>
+      <description>DB Connection</description>
+      <res-ref-name>jdbc/movie</res-ref-name>
+      <res-type>javax.sql.DataSource</res-type>
+      <res-auth>Container</res-auth>
+  </resource-ref>
+  
+   <servlet>
+    <servlet-name>axis</servlet-name>
+    <servlet-class>org.apache.axis.transport.http.AxisServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>UserLoginServlet</servlet-name>
+    <servlet-class>zjn.servlet.UserLoginServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>MovieServlet</servlet-name>
+    <servlet-class>zjn.servlet.MovieServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>MovieRecommenderServlet</servlet-name>
+    <servlet-class>zjn.servlet.MovieRecommenderServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>UserRegisterServlet</servlet-name>
+    <servlet-class>zjn.servlet.UserRegisterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>AnonymousRecommenderServlet</servlet-name>
+    <servlet-class>zjn.servlet.AnonymousRecommenderServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>MovieShowServlet</servlet-name>
+    <servlet-class>zjn.servlet.MovieShowServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>SimilarItemsRecommenderServlet</servlet-name>
+    <servlet-class>zjn.servlet.SimilarItemsRecommenderServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description>This is the description of my J2EE component</description>
+    <display-name>This is the display name of my J2EE component</display-name>
+    <servlet-name>MovieRatingServlet</servlet-name>
+    <servlet-class>zjn.servlet.MovieRatingServlet</servlet-class>
+  </servlet>
+
+
+
+
+
+  
+  <filter>
+     <filter-name>characterFilter</filter-name>
+     <filter-class>zjn.util.CharacterFilter</filter-class>
+     <init-param>
+       <param-name>encoding</param-name>
+       <param-value>UTF-8</param-value>
+     </init-param>
+  </filter>
+  <filter-mapping>
+     <filter-name>characterFilter</filter-name>
+     <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <servlet-mapping>
+    <servlet-name>axis</servlet-name>
+    <url-pattern>*.jws</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UserLoginServlet</servlet-name>
+    <url-pattern>/UserLoginServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MovieServlet</servlet-name>
+    <url-pattern>/MovieServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MovieRecommenderServlet</servlet-name>
+    <url-pattern>/MovieRecommenderServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>UserRegisterServlet</servlet-name>
+    <url-pattern>/UserRegisterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>AnonymousRecommenderServlet</servlet-name>
+    <url-pattern>/AnonymousRecommenderServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MovieShowServlet</servlet-name>
+    <url-pattern>/MovieShowServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>SimilarItemsRecommenderServlet</servlet-name>
+    <url-pattern>/SimilarItemsRecommenderServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>MovieRatingServlet</servlet-name>
+    <url-pattern>/MovieRatingServlet</url-pattern>
+  </servlet-mapping>
+  
+  
+   <!-- The rest of the config is adapted from Axis's default web app -->
+
+  <session-config>
+    <session-timeout>5</session-timeout>
+  </session-config>
+  
+    <!-- currently the W3C havent settled on a media type for WSDL;
+     http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
+     for now we go with the basic 'it's XML' response -->
+  <mime-mapping>
+    <extension>wsdl</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>xsd</extension>
+    <mime-type>text/xml</mime-type>
+  </mime-mapping>
+  	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+ 
+ 
+</web-app>

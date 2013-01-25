@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>index.html</title>
+	
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link type="text/css" href="js/css/pepper-grinder/jquery-ui-1.8.18.custom.css" rel="stylesheet" />	
+    <link type="text/css"  href="js/css/demos.css" rel="stylesheet" />
+    <script type="text/javascript" src="js/js/jquery-1.7.1.min.js" ></script>
+    <script type="text/javascript" src="js/js/jquery-ui-1.8.18.custom.min.js" ></script>
+    
+    <script>
+	$(function() {
+		
+		var rHtml= " 姓名：<input id='rUsername' type='text' required='required' placeholder='姓名'><br> 爱好：<input id='rHobby' type='text' placeholder='输入爱好，以逗号隔开'><br>"+ 
+                   " 性别:<input type='radio' name='rSex' id='rSex1' value = 'm' />男    <input type='radio' name='rSex' id='rSex2' value = 'w' />女";
+		
+		 $( "#login" ).dialog({
+			height: 280,
+			modal: true,
+			  buttons: {
+                     "登录": function() {
+                     	 onLogin($('#username').val(),$('#id').val());
+                         $(this).dialog("close");
+                     },
+					 "注册": function() {
+						 $( "#register" ).text('');
+						 $( "#register" ).append(rHtml);
+						 $( "#register" ).dialog( "open" );
+                         $(this).dialog("close");
+                     }
+			  }
+		});
+		 
+		 
+		 $( "#register" ).dialog({
+				autoOpen: false,
+				show: "blind",
+				hide: "explode",
+				
+				 buttons: {
+					 "加入": function() {
+						 var radio = $('input[name="rSex"]:checked');
+						 var rSex = radio.val();
+						 var rUsername = $('#rUsername').val();
+						 var rHobby = $('#rHobby').val();
+						 register(rUsername,rHobby,rSex);
+                     }
+			  }
+			});
+		 
+		 $( "#showMovie" ).dialog({
+				autoOpen: false,
+				show: "blind",
+				hide: "explode",
+				height:500,
+				width:650,
+				 buttons: {
+					 "评分": function() {
+						 
+						 var radio = $('input[name="score"]:checked');
+						 var userID = $("#userID").text(); 
+						 var movieID = $("#movieIDScore").text();
+						 var score = radio.val(); 
+						 setMovieScore(userID,movieID,score);
+                  },
+		           "取消": function() {
+		        	   $( "#showMovie" ).dialog("close");
+                       }
+			      }
+			});
+		 
+		 
+		 
+		 $( "#remind" ).dialog({
+				autoOpen: false,
+				show: "blind",
+				hide: "explode",
+				 buttons: {
+		           "关闭": function() {
+		        	   $( "#remind" ).dialog("close");
+                    }
+			      }
+			});
+		 
+		 
+		 
+		 
+		 
+		 
+		 $( "#login2" ).dialog({
+				autoOpen: false,
+				show: "blind",
+				hide: "explode",
+				buttons: {
+                    "登录": function() {
+                    	onLogin2($('#rUsername').val(),$('#rId').val());
+                        $(this).dialog("close");
+                    },
+					 "注册": function() {
+						 $( "#register" ).text('');
+						 $( "#register" ).append(rHtml);
+						 $( "#register" ).dialog( "open" );
+                         $(this).dialog("close");
+                    }
+			  }
+			});
+		 
+		 //评分后重新加载用户的喜爱电影和推荐电影
+		 function setMovieScore(userID,movieID,score){			 
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/MovieRatingServlet",
+					dataType:"json",
+					data:{
+			   	       userID : userID,
+			   	       movieID : movieID,
+			   	       score :score
+			   	        
+					},
+					success: function(data, textStatus){
+						var html = "<div style='color:red;font-size:24px'>"+data.message+"</div>";
+						$('#showMovie').attr("title","提示");
+						$('#showMovie').text('');
+						$('#showMovie').dialog("close");
+						$( "#remind" ).text('');
+						$( "#remind" ).append(html);
+						$( "#remind" ).dialog("open");
+						alert($('#userID').text());
+						loadUserMovies($('#userID').text());
+						loadRecommendMovies($('#userID').text(),1);
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			 });
+			 
+		 }
+		 
+		 function register(rUsername,rHobby,rSex){
+			 
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/UserRegisterServlet",
+					dataType:"json",
+					data:{
+			   	        rUsername: rUsername,
+			   	        rHobby:rHobby,
+			   	        rSex:rSex
+			   	        
+					},
+					success: function(data, textStatus){
+						 var html = "";
+						 if(data.id > 0){
+							 html += "用户ID ："+data.id+"<br />"+"用户名："+data.name+"<br />";
+							 html += "用户爱好 ："+data.hobby;
+							 html +="<div style='color:#00FF00;font-size:15px'>"+data.message+"</div>";
+							 html +="<div id='goLogin' style='color:#39F;font-size:15px'>现在去登录</div>";		
+							
+						 }else{
+							 html +="<div style='color:#00FF00;font-size:15px'>"+data.message+"</div>";
+						 }
+						 
+						 $('#register').attr("title","提示");
+						 $('#register').text('');
+						 $('#register').append(html);
+						   
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});
+			 
+		 }
+		 
+		 
+		 function onLogin(username,id){
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/UserLoginServlet",
+					dataType:"json",
+					data:{
+						id : id,
+			   	        username: username
+					},
+					success: function(data, textStatus){
+						        loadUserMovies(data.id);
+						        loadRecommendMovies(data.id,1);
+						        var html ="";
+								html +="<div id='userID'>"+data.id+"</div>";
+								html +="<div id='username'>"+data.name+"</div>";
+								$("#user").text('');
+								$("#user").append(html);
+								
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});
+			 
+		};
+		
+		 function onLogin2(username,id){
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/UserLoginServlet",
+					dataType:"json",
+					data:{
+						id : id,
+			   	        username: username
+					},
+					success: function(data, textStatus){
+						        //loadUserMovies(data.id);
+						        loadAnonymousRecommendMovies(data.id);
+						        var html ="";
+								html +="<b>"+data.id+"</b>---><i>"+data.name+"<i>";
+								$("#user").append(html);
+								
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});
+			 
+		};
+		
+		 $("#sub_type").click(function(){
+			    var user_id = $('#id').val();
+			    var rType = $('#rTpye').val();
+			    loadRecommendMovies(user_id,rType);
+			    
+			  });
+		 
+		 $('#goLogin').live("click",function(){
+			 $( "#register" ).dialog( "close" );
+			 $( "#login2" ).dialog( "open" );
+		 });
+		 
+		 //
+		 $('.movie').live("click",function(){
+			getMovieShow($(this).attr("id"));
+			 $( "#showMovie" ).dialog( "open" );
+		 });
+		 
+		 $('.movieUser').live("click",function(){
+				getUserMovieShow($(this).attr("id"));
+				 $( "#showMovie" ).dialog( "open" );
+			 });
+		 
+		 
+		 
+		 //得到用户自己喜欢的电影详情（不能再进行评分）
+			function getUserMovieShow(movieID){
+				
+				 $.ajax({
+						type: "post",
+						url: "/MovieSite3/MovieShowServlet",
+						dataType:"json",
+						data:{
+							movieID : movieID
+						},
+						success: function(data, textStatus){
+							       
+							       $('#showMovie').text('');
+							       var html = "";
+							       html +=  "<span style='color:red;font-size:15px'>电影编号：</span>"+"<div id='movieIDScore'>"+data.id+"</div>";
+							       html += "<span style='color:red;font-size:15px'>电影名称：</span>"+data.name+"<br />";
+							       html += "<span style='color:red;font-size:15px'>电影类型：</span>"+data.type +"<br />"; 
+							       loadSimilarItemsMovies(data.id,html); 
+						},
+						complete: function(XMLHttpRequest, textStatus){
+							//HideLoading();
+						},
+						error: function(){
+							//请求出错处理
+						}
+				});
+			};
+		 
+		//得到推荐电影的详情（用户可以对它进行评分）
+		function getMovieShow(movieID){
+			
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/MovieShowServlet",
+					dataType:"json",
+					data:{
+						movieID : movieID
+					},
+					success: function(data, textStatus){
+						       
+						       $('#showMovie').text('');
+						       var html = "";
+						       html +=  "<span style='color:red;font-size:15px'>电影编号：</span>"+"<div id='movieIDScore'>"+data.id+"</div>";
+						       html += "<span style='color:red;font-size:15px'>电影名称：</span>"+data.name+"<br />";
+						       html += "<span style='color:red;font-size:15px'>电影类型：</span>"+data.type +"<br />"; 
+						       html += "<span style='color:#39F;font-size:15px'>评分：</span><input type='radio' name='score' value='1' />1";
+						       html += "<input type='radio' name='score'  value='2' />2<input type='radio' name='score'  value='3' />3<input type='radio' name='score'  value='4' />4<input type='radio' name='score'  value='5' />5<br />";
+						       loadSimilarItemsMovies(data.id,html); 
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});
+		};
+		
+		
+		
+		function loadSimilarItemsMovies(moviesID,html){
+			
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/SimilarItemsRecommenderServlet",
+					dataType:"json",
+					data:{
+						moviesID : moviesID
+			   	        
+					},
+					success: function(data, textStatus){
+						      html +="<div>浏览该电影的人，也看了以下电影：</div>";
+						      html +=" <table><tr><th>电影名称</th> <th>电影类型</th></tr>";
+						      for(var i=0;i<data.length;i++){
+								  html+="<tr id='"+data[i].movie.id+"' class='movie'><td>"+data[i].movie.name+"</td><td>"+data[i].movie.type+"</td></tr>";
+							  }
+		                         html+="</table>";
+		                         $('#showMovie').append(html);
+		                        
+								
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});
+			
+			
+		}
+		
+		
+		var loadUserMovies = function(user_id){
+			
+			$.ajax({
+				type: "post",
+				url: "/MovieSite3/MovieServlet",
+				dataType:"json",
+				data:{
+					id : user_id
+				},
+				success: function(data, textStatus){
+					  alert(data[1].movie.id);
+					  var html=" <table><tr><th>电影名称</th> <th>电影类型</th><th>电影评分</th> </tr>";
+					  for(var i=0;i<data.length;i++){
+						  html+="<tr id='"+data[i].movie.id+"' class='movieUser'><td>"+data[i].movie.name+"</td><td>"+data[i].movie.type+"</td><td>"+data[i].score+"</td></tr>";
+					  }
+                        html+="</table>";
+                        $("#myMovieList").text("");
+                        $("#myMovieList").append(html);
+				},
+				complete: function(XMLHttpRequest, textStatus){
+					//HideLoading();
+				},
+				error: function(){
+					//请求出错处理
+				}
+		});		
+		};
+		
+		
+		 var loadRecommendMovies = function(user_id,rType){
+			 
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/MovieRecommenderServlet",
+					dataType:"json",
+					data:{
+						id : user_id,
+						rType : rType
+					},
+					success: function(data, textStatus){
+						  var html=" <table><tr><th>电影名称</th> <th>电影类型</th><th>电影评分</th> </tr>";
+						  for(var i=0;i<data.length;i++){
+							  html+="<tr id='"+data[i].movie.id+"' class='movie'><td>"+data[i].movie.name+"</td><td>"+data[i].movie.type+"</td><td>"+data[i].score+"</td></tr>";
+						  }
+	                        html+="</table>";
+	                        $("#rMovieList").text("");
+	                        $("#rMovieList").append(html);
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});		
+			 
+		 };
+		 
+		 
+     var loadAnonymousRecommendMovies = function(user_id){
+			 
+			 $.ajax({
+					type: "post",
+					url: "/MovieSite3/AnonymousRecommenderServlet",
+					dataType:"json",
+					data:{
+						id : user_id
+					},
+					success: function(data, textStatus){
+						  var html=" <table><tr><th>电影名称</th> <th>电影类型</th><th>电影评分</th> </tr>";
+						  for(var i=0;i<data.length;i++){
+							  html+="<tr><td>"+data[i].movie.name+"</td><td>"+data[i].movie.type+"</td><td>"+data[i].score+"</td></tr>";
+						  }
+	                        html+="</table>";
+	                        $("#rMovieList").text("");
+	                        $("#rMovieList").append(html);
+					},
+					complete: function(XMLHttpRequest, textStatus){
+						//HideLoading();
+					},
+					error: function(){
+						//请求出错处理
+					}
+			});		
+			 
+		 };
+		
+	});
+	</script>
+    
+    <style>
+    
+     h2 { 
+		font-family:'Myriad Pro', Verdana, Arial, Helvetica, sans-serif; font-size:50px; color:#FFF; letter-spacing:5px; text-align:center;
+		 text-shadow:
+		 1px 1px 0 #CCC,
+		 2px 2px 0 #CCC,
+		 3px 3px 0 #444,
+		 4px 4px 0 #444,
+		 5px 5px 0 #444,
+		 6px 6px 0 #444,
+		 /* The Blur - optional */ 5px 5px 15px #999 ; 
+		/* Transform Effect */
+		-webkit-transition: all 0.12s ease-out;		/* Safari & Chrome */
+		-moz-transition: all 0.12s ease-out;		/* Firefox */
+		-o-transition: all 0.12s ease-out;			/* Opera */
+	}
+
+	h2:hover  {  
+	  /* Scaling Effect */		 
+	  -webkit-transform: scale(1.1);     /* Safari & Chrome */
+	  -moz-transform: scale(1.1);		 /* Firefox */
+	  -o-transform: scale(1.1);		     /* Opera */
+	
+	}
+	
+	body{
+		background-color: #FFF;
+		color: #000;
+		font-size:18px;
+	}
+    
+    #rMovie{
+		width:48%;
+		float:left;
+	}
+	#myMovie{
+		width:48%;
+		float:right;
+	}
+	
+	#rMovieList{
+		border:#C00 dashed 1px;
+	}
+	
+	#myMovieList{
+		border:  #0F0 dashed 1px;
+	}
+	
+	
+	table {
+		margin: auto;
+		width: 600px;
+		text-align: left;
+		border: 1px solid #99ff99;
+	}
+	
+	tr:nth-child(2n+1) {
+		background-color: #0F6;
+	}
+	
+	tr:nth-child(1) {
+		background-color: #30C;
+	}
+	
+    </style>
+
+  </head>
+  
+  <body>
+     <div id="login" title="用户登录">
+                       用户ID：<input id="id" type="text"><br>
+                       姓 &nbsp;名：<input id="username" type="text"><br>  
+     </div>
+   
+       <div id="header"><h2>电影推荐引擎</h2></div>
+       <fieldset>
+          <div >欢迎你----><span style="color:#639;" id="user">朱江楠</span>！！</div>
+       </fieldset>
+      <fieldset>
+         
+           <div id="rMovie">
+             <i>推荐方式：</i> 
+             
+                  <select id="rTpye">
+					<option value="1">
+						基于用户的协同推荐
+					</option>
+					<option value="2">
+						基于物品的协同推荐
+					</option>
+					<option value="3">
+						基于SlopOne的协同推荐
+					</option>
+				</select><input type="submit" value="推荐" id="sub_type" >
+                 
+              <h3>推荐电影</h3>
+                 <div id="rMovieList">
+                    <div style="margin:5px;" id="recommend_movies_loading">
+		     		<img src="images/loading.gif"></img>		     
+				    </div>   
+                 </div>
+           </div>
+           <br>
+           
+           <div id="myMovie">
+           <h3>我的电影</h3>
+                <div id="myMovieList">
+                       <div id="rMovieList">
+                       <div style="margin:5px;" id="recommend_movies_loading">
+		     		   <img src="images/loading.gif"></img>	
+		     		   </div>	     
+				    </div>        
+                </div>
+           </div>
+      </fieldset>
+      
+      <div id="register" title="新用户注册">
+        
+      </div>
+      
+      
+      <div id="login2" title="用户登录">
+                       用户ID：<input id="rId" type="text"><br>
+                       姓 &nbsp;名：<input id="rUsername" type="text"><br>  
+     </div>
+     
+     <div id="showMovie" title="电影详情">      
+     </div>
+     
+     <div id="remind" title ="提示">
+     
+     </div>
+      
+  </body>
+</html>
